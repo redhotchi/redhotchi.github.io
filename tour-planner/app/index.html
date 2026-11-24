@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여행계획 도우미</title>
+<style>
+:root{
+--paper:#F8FAFC; --ink:#0F172A; --ink-soft:#475569;
+--line:#E2E8F0; --sea:#0EA5E9; --sea-deep:#0284C7;
+--stamp:#F43F5E; --gold:#38BDF8; --card:#FFFFFF;
+}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-size:16px;line-height:1.6;color:var(--ink);background:var(--paper);max-width:760px;margin:0 auto;padding:0 20px 64px}
+/* masthead */
+.mast{padding:28px 0 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mast-title{display:flex;align-items:center;gap:10px}
+.mast h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.02em}
+.mast p{margin:6px 0 0;color:var(--ink-soft);font-size:14px}
+.badge{color:#E11D48;background:#FFF1F2;border:1px solid #FECDD3;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+label{display:block;font-size:13.5px;font-weight:600;color:var(--ink);margin:14px 0 6px}
+input,select{border:1px solid #CBD5E1;border-radius:8px;padding:10px 12px;font-size:15px;background:#fff;color:var(--ink);min-height:44px;max-width:100%;transition:border-color .15s,box-shadow .15s}
+input:hover,select:hover{border-color:#94A3B8}
+input:focus-visible,select:focus-visible{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(14,165,233,.25)}
+button:focus-visible{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(14,165,233,.25)}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:160px}
+.sec{font-size:13px;font-weight:700;color:var(--sea-deep);letter-spacing:.02em;margin:20px 0 4px;padding-top:16px;border-top:1px solid var(--line)}
+.sec:first-child{margin-top:0;padding-top:0;border-top:0}
+.panel label{margin-top:8px}
+.panel .row>div>label{margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06)}
+#go{width:100%;background:var(--sea);color:#fff;border:0;border-radius:8px;font-weight:700;font-size:16px;min-height:48px;margin-top:16px;box-shadow:0 1px 2px rgba(15,23,42,.08);cursor:pointer;transition:background-color .15s}
+#go:hover{background:var(--sea-deep)}
+/* ticket results */
+.ticket{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:16px 0;box-shadow:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);overflow:hidden}
+.ticket .stub{padding:18px 20px}
+.ticket .head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}
+.ticket .head b{font-size:16px}
+.ticket .fare{font-size:20px;font-weight:800;color:var(--sea-deep);white-space:nowrap}
+.ticket.win{border:2px solid var(--sea)}
+.ticket.win .head b{color:var(--stamp)}
+.ticket small{color:var(--ink-soft)}
+.ticket a{color:var(--sea-deep);font-weight:600;text-decoration:none}
+.ticket a:hover{text-decoration:underline}
+details{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fff}
+details summary{cursor:pointer;font-weight:600}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}h1{font-size:22px}.fare{font-size:18px}body{padding:0 14px 56px}.panel{padding:16px}.ticket .stub{padding:14px 14px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}</style>
+</head>
+<body>
+<div class="mast">
+<div>
+<div class="mast-title">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+<h1>여행계획 도우미</h1>
+</div>
+<p>1단계: 월 최저가 플랜 (목업가 기준, 링크로 예매, 예약기능 없음)</p>
+</div>
+<span class="badge">BETA · 목업 가격</span>
+</div>
+
+<div class="panel">
+<div class="sec">여정</div>
+<div class="grid2">
+<div><label>출발지 (인천/김포 묶음)</label>
+<select id="origin">
+<option value="SEL">서울 전체 (SEL: 인천+김포)</option>
+<option value="PUS">부산 (PUS)</option>
+<option value="CJU">제주 (CJU)</option>
+</select></div>
+<div><label>목적지 국가</label>
+<select id="country">
+<option value="일본">일본</option>
+<option value="베트남">베트남</option>
+<option value="태국">태국</option>
+<option value="미국">미국</option>
+<option value="한국">한국</option>
+</select></div>
+</div>
+<div id="jpBox" class="grid2">
+<div><label>일본 도착공항</label><select id="jpPort">
+<option value="NRT">나리타 (NRT, 도쿄)</option>
+<option value="KIX">간사이 (KIX, 오사카)</option>
+</select></div>
+<div><label>일본 공항→시내 교통</label><select id="jpTrans">
+<option value="skyliner">스카이라이너 (NRT-우에노, ¥2,570 / 0.75h)</option>
+<option value="nex">나리타 익스프레스 (¥3,250 / 1h)</option>
+<option value="access">스카이액세스 (¥1,270 / 1.2h)</option>
+<option value="nrtbus">NRT 리무진버스 (¥3,600 / 1.5h)</option>
+<option value="rapit">라피트 (KIX-난바, ¥1,910 / 0.6h)</option>
+<option value="haruka">하루카 (KIX-오사카, ¥1,910 / 0.8h)</option>
+<option value="kixbus">KIX 버스 (¥1,800 / 1h)</option>
+</select></div>
+</div>
+<div class="grid2">
+<div><label>여행 월</label>
+<input type="month" id="month" /></div>
+<div><label>여행일수 (n일, 월내 연속)</label><input type="number" id="tripdays" value="3" min="2" max="15" /></div>
+</div>
+<div class="sec">조건</div>
+<div class="grid2">
+<div><label>항공 출발시간 (부터)</label><input type="time" id="from" value="08:00" /></div>
+<div><label>항공 출발시간 (까지)</label><input type="time" id="to" value="18:00" /></div>
+</div>
+<div id="originTransBox"><label>한국 공항 접근 교통 (출발지→공항)</label><select id="originTrans">
+<option value="limo">리무진버스 (17,000원 / 1.2h)</option>
+<option value="arex_all">공항철도 일반 (4,950원 / 1.1h)</option>
+<option value="arex_exp">공항철도 직통 (9,500원 / 0.75h)</option>
+<option value="taxi">택시 (70,000원 / 0.9h)</option>
+<option value="none">없음 (지방출발·자차 등)</option>
+</select></div>
+<details style="margin-top:12px"><summary>시작·종료일 직접 지정 (2단계용)</summary>
+<div class="grid2">
+<div><label>여행 시작 (선택)</label><input type="date" id="start" /></div>
+<div><label>여행 종료 (선택)</label><input type="date" id="end" /></div>
+</div>
+</details>
+</div>
+<button id="go" style="margin-top:12px">가장 싼 날 찾기</button>
+</div>
+
+<div class="panel">
+<details>
+<summary><b>제휴 ID 설정 (내 커미션용, 본인만 사용)</b></summary>
+<p><small>발급받은 ID를 넣으면 숙소 링크에 자동 포함됩니다. 브라우저에만 저장됩니다.</small></p>
+<div class="row">
+<div><label>Booking aid</label><input id="aff_booking" placeholder="예: 1234567" /></div>
+<div><label>Agoda cid</label><input id="aff_agoda" placeholder="예: 1891234" /></div>
+</div>
+<p><small>일본 Jalan/Rakuten/Ikyu/JTB는 ValueCommerce·A8 경유 별도 승인 필요라 일반 링크로 둡니다. Booking+Agoda만으로 5개국 커버+수익화됩니다.</small></p>
+</details>
+</div>
+
+<div id="out"></div>
+
+<script>
+// 국가별 예약사이트 (호텔은 해당국가 사이트 기준)
+const BOOKING = {
+  "일본": [{n:"Jalan(지란넷)",u:"https://www.jalan.net/"},{n:"Rakuten Travel",u:"https://travel.rakuten.co.jp/"},{n:"Ikyu(一休)",u:"https://www.ikyu.com/"},{n:"JTB",u:"https://www.jtb.co.jp/"},{n:"Yahoo!トラベル",u:"https://travel.yahoo.co.jp/"}],
+  "베트남": [{n:"Traveloka VN",u:"https://www.traveloka.com/vi-vn/activity"},{n:"Mytour",u:"https://mytour.vn/"},{n:"VNTrip",u:"https://vntrip.vn/"},{n:"Klook",u:"https://www.klook.com/vi/"},{n:"Agoda",u:"https://www.agoda.com/"}],
+  "태국": [{n:"Agoda",u:"https://www.agoda.com/"},{n:"Traveloka TH",u:"https://www.traveloka.com/th-th/"},{n:"Klook",u:"https://www.klook.com/th/"}],
+  "미국": [{n:"Expedia",u:"https://www.expedia.com/"},{n:"Booking.com",u:"https://www.booking.com/"}],
+  "한국": [{n:"야놀자",u:"https://www.yanolja.com/"},{n:"여기어때",u:"https://www.goodchoice.kr/"},{n:"쿠팡트래블",u:"https://travel.coupang.com/"},{n:"Klook",u:"https://www.klook.com/ko/"}]
+};
+// 한국 항공사 우선 + SEL(인천+김포) 묶음. 외항사는 제외.
+// shortcut: 목업 가격은 날짜 해시 기반, 실가격 아님. Duffel 프록시로 교체 예정.
+const AIRLINES=["대한항공","아시아나항공","제주항공","진에어","티웨이항공","에어부산","에어서울"];
+const AIRPORTS={SEL:["ICN","GMP"],PUS:["PUS"],CJU:["CJU"]};
+function mockFlight(dateStr, hhmm, airline){
+  let h=0; for(const c of dateStr+hhmm+airline) h=(h*31+c.charCodeAt(0))%1000;
+  const d=parseYmd(dateStr).getDay();
+  const weekend=(d===0||d===5||d===6)?45000:0;
+  return 80000 + (h%60000) + weekend;
+}
+function mockHotel(dateStr, i){
+  let h=0; for(const c of dateStr+i) h=(h*17+c.charCodeAt(0))%1000;
+  // shortcut: 쇼핑사이트 평균가 기준. 캡슐호텔 제외, 일반호텔만. 실가격 연동 시 카테고리 필터로 교체.
+  const avg=HOTEL_AVG[currentCountry()]||80000;
+  return Math.round(avg*0.7 + (h%Math.round(avg*0.6)));
+}
+// 캡슐 제외 필터: 지금 목업 호텔명(HOTEL_TYPES)엔 캡슐이 없어 걸러지는 항목이 없다. 실데이터 연동 시 이름·카테고리에 적용.
+const CAPSULE_RX=/캡슐|캡술|カプセル|capsule/i;
+const HOTEL_TYPES=["비즈니스호텔","시티호텔","관광호텔","리조트호텔","료칸·온천호텔"];
+function isRealHotel(name){return !CAPSULE_RX.test(name);}
+function mockArea(dateStr, i){
+  let h=0; for(const c of ("area"+dateStr+i)) h=(h*13+c.charCodeAt(0))%1000;
+  return 14 + (h%27);
+}
+const HOTEL_AVG={"일본":120000,"베트남":60000,"태국":70000,"미국":180000,"한국":110000};
+const TIMES=["07:00","09:30","13:00","17:30","19:00"];
+const DEST_AIRPORT={"일본":"NRT","베트남":"SGN","태국":"BKK","미국":"JFK","한국":"CJU"};
+function currentCountry(){return (document.getElementById("country")||{}).value||"일본";}
+// shortcut: 일본 직통열차·버스 요금은 공식가(엔) 앵커, 총비용 합산 시 고정환율로 원화 환산.
+const FX_JPY=9.5;
+const JP_TRANS={skyliner:{n:"스카이라이너",yen:2570,h:0.75},nex:{n:"NEX",yen:3250,h:1},access:{n:"스카이액세스",yen:1270,h:1.2},nrtbus:{n:"NRT버스",yen:3600,h:1.5},rapit:{n:"라피트",yen:1910,h:0.6},haruka:{n:"하루카",yen:1910,h:0.8},kixbus:{n:"KIX버스",yen:1800,h:1}};
+// shortcut: 비행시간+공항이동 목업. 실측 후 API/테이블로 교체.
+const FLIGHT_HOURS={"일본":2,"베트남":5,"태국":6,"미국":13,"한국":1};
+const TRANSFER={"NRT":{h:1.2,cost:35000},"SGN":{h:0.8,cost:15000},"BKK":{h:0.8,cost:12000},"JFK":{h:1,cost:30000},"CJU":{h:0.5,cost:15000}};
+// shortcut: 수도권→ICN/GMP 접근 목업. 실측 후 요금표로 교체.
+const ORIGIN_TRANS={limo:{n:"리무진",cost:17000,h:1.2},arex_all:{n:"공항철도 일반",cost:4950,h:1.1},arex_exp:{n:"공항철도 직통",cost:9500,h:0.75},taxi:{n:"택시",cost:70000,h:0.9},none:{n:"없음",cost:0,h:0}};
+const DOW=["일","월","화","수","목","금","토"];
+function dow(ds){const d=parseYmd(ds);return isNaN(d)?"":DOW[d.getDay()];}
+function hotelDeep(ci, co){
+  const city={NRT:"Tokyo",KIX:"Osaka",SGN:"Ho Chi Minh",BKK:"Bangkok",JFK:"New York",CJU:"Jeju"}[destCodeGlobal]||countryGlobal;
+  return affLink(`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&checkin=${ci}&checkout=${co}&no_rooms=1&group_adults=2`);
+}
+let destCodeGlobal="NRT", countryGlobal="일본";
+function flightLinks(origin, destCode, dep, ret){
+  const ap=(origin==="SEL")?"ICN":origin; // path용: path는 실공항 코드
+  const ymd=dep.replace(/-/g,"");
+  const naver=`https://flight.naver.com/flights/international/${ap}-${destCode}-${ymd}?adult=1&fareType=Y`;
+  const r=ret?ret.replace(/-/g,"").slice(2):"";
+  const sky=`https://www.skyscanner.co.kr/transport/flights/${String(origin).toLowerCase()}/${destCode.toLowerCase()}/${ymd.slice(2)}${r?"/"+r:""}/?adultsv2=1&cabinclass=economy&rtn=${r?1:0}`;
+  return `<a href="${naver}" target="_blank" rel="noopener">네이버항공</a> · <a href="${sky}" target="_blank" rel="noopener">스카이스캐너</a>`;
+}
+
+// 제휴 ID는 localStorage에만 저장. 예: Booking aid, Agoda cid
+function affLink(base){
+  const bid=(document.getElementById("aff_booking")||{}).value||localStorage.getItem("aff_booking")||"";
+  const cid=(document.getElementById("aff_agoda")||{}).value||localStorage.getItem("aff_agoda")||"";
+  if(base.includes("booking.com")&&bid) return base+(base.includes("?")?"&":"?")+"aid="+encodeURIComponent(bid);
+  if(base.includes("agoda.com")&&cid) return base+(base.includes("?")?"&":"?")+"cid="+encodeURIComponent(cid);
+  return base;
+}
+["aff_booking","aff_agoda"].forEach(id=>{
+  document.addEventListener("DOMContentLoaded",()=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.value=localStorage.getItem(id)||"";
+    el.onchange=()=>localStorage.setItem(id,el.value.trim());
+  });
+});
+function syncJpBox(){
+  const c=(document.getElementById("country")||{}).value;
+  const box=document.getElementById("jpBox");
+  if(box) box.style.display=(c==="일본")?"grid":"none";
+}
+function syncOriginBox(){
+  const o=(document.getElementById("origin")||{}).value;
+  const box=document.getElementById("originTransBox");
+  if(box) box.style.display=(o==="SEL")?"":"none";
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("country").onchange=syncJpBox; syncJpBox();
+  document.getElementById("origin").onchange=syncOriginBox; syncOriginBox();
+});
+document.getElementById("go").onclick=async ()=>{
+  const country=document.getElementById("country").value;
+  const origin=document.getElementById("origin").value;
+  const airports=AIRPORTS[origin]||["ICN","GMP"];
+  const month=document.getElementById("month").value;
+  const s=document.getElementById("start").value;
+  const e=document.getElementById("end").value;
+  const from=document.getElementById("from").value||"08:00";
+  const to=document.getElementById("to").value||"18:00";
+  const out=document.getElementById("out");
+  if(!month){out.innerHTML="<p>여행 월을 입력하세요. (1단계는 월만으로 동작)</p>";return;}
+  const hourVal=15000;
+  let destCode=DEST_AIRPORT[country]||"NRT";
+  let tr=TRANSFER[destCode]||{h:1,cost:20000};
+  let trName="기본";
+  if(country==="일본"){
+    destCode=(document.getElementById("jpPort")||{}).value||"NRT";
+    const jt=JP_TRANS[(document.getElementById("jpTrans")||{}).value]||JP_TRANS.skyliner;
+    const krw=Math.round(jt.yen*FX_JPY);
+    tr={h:jt.h,cost:krw}; trName=`${jt.n} ¥${jt.yen.toLocaleString()}`;
+  }
+  const flyH=FLIGHT_HOURS[country]||3;
+  destCodeGlobal=destCode; countryGlobal=country;
+  const transCost=tr.cost;
+  const ot=ORIGIN_TRANS[document.getElementById("originTrans").value]||ORIGIN_TRANS.limo;
+  const originCost=(origin==="SEL")?ot.cost:0;
+  const originH=(origin==="SEL")?ot.h:0;
+
+  // 해당월 전체 날짜 순회 (국적기만, SEL=ICN+GMP 묶음, 왕복 기준) - 1단계: 월 최저가
+  const [y,m]=month.split("-").map(Number);
+  const days=new Date(y,m,0).getDate();
+  const tripDays=Math.min(15,Math.max(2,Number(document.getElementById("tripdays").value||3)));
+  const NIGHTS=tripDays-1;
+  let cands=[];
+  for(let d=1;d<=days;d++){
+    const ds=`${month}-${String(d).padStart(2,"0")}`;
+    const rt=new Date(ds);rt.setDate(rt.getDate()+NIGHTS);
+    const dsRet=rt.toISOString().slice(0,10);
+    for(const t of TIMES){
+      if(t<from||t>to) continue; // 08-18 기본 필터, 옵션 변경 가능
+      for(const al of AIRLINES){
+        for(const ap of airports){
+          const ticket=mockFlight(ds,t,al)+mockFlight(dsRet,t,al)+(ap==="GMP"?-3000:0);
+          const timeCost=Math.round((flyH*2+tr.h+originH)*hourVal);
+          cands.push({date:ds,ret:dsRet,time:t,airline:al,ap,price:ticket,total:ticket+timeCost+transCost+originCost,timeCost});
+        }
+      }
+    }
+  }
+  if(!cands.length){out.innerHTML="<p>해당 시간대에 국적기 항공 없음 (시간 필터를 넓혀보세요).</p>";return;}
+  cands.sort((a,b)=>a.total-b.total);
+  const hasRange=(s&&e);
+  const inRange=hasRange?cands.filter(c=>c.date>=s&&c.date<=e):[];
+  const bestRange=hasRange?inRange[0]:null;
+  // 일자별 최저 항공 (당일 cheapest 1건)
+  const dateBest=[...new Map(cands.slice().sort((a,b)=>a.total-b.total).map(c=>[c.date,c])).values()];
+  // n일 연속 윈도우 탐색 (월내)
+  const wins=[];
+  for(let d=1;d+NIGHTS<=days;d++){
+    const ds=`${month}-${String(d).padStart(2,"0")}`;
+    const end=new Date(ds);end.setDate(end.getDate()+NIGHTS);
+    const de=end.toISOString().slice(0,10);
+    if(de.slice(0,7)!==month) continue;
+    const f=dateBest.find(c=>c.date===ds);
+    if(!f) continue;
+    const stay=[...Array(NIGHTS)].map((_,k)=>{const t=new Date(ds);t.setDate(t.getDate()+k);return t.toISOString().slice(0,10);});
+    const cheapHotel=Math.min(...[0,1,2,3,4,5,6].map(i=>stay.reduce((s,dt)=>s+mockHotel(dt,i),0)));
+    wins.push({s:ds,e:de,f,hotel:cheapHotel,total:f.total+cheapHotel});
+  }
+  wins.sort((a,b)=>a.total-b.total);
+  const bestWin=wins[0];
+  const bestMonth=bestWin?bestWin.f:cands[0];
+  // 상위 3개 날짜 플랜 (윈도우 총비용 기준)
+  const top3=wins.slice(0,3);
+  const hotelBase=bestMonth.date;
+  const coDate=new Date(hotelBase);coDate.setDate(coDate.getDate()+NIGHTS);
+  const coStr=coDate.toISOString().slice(0,10);
+  const stayDates=[...Array(NIGHTS)].map((_,k)=>{const d=new Date(hotelBase);d.setDate(d.getDate()+k);return d.toISOString().slice(0,10);});
+  const hotels=[0,1,2,3,4,5,6].map(i=>({n:`${country} ${HOTEL_TYPES[i%HOTEL_TYPES.length]} ${i+1}`,p:stayDates.reduce((s,dt)=>s+mockHotel(dt,i),0),area:mockArea(hotelBase,i)}))
+    .filter(h=>isRealHotel(h.n))
+    .sort((a,b)=>a.p-b.p).slice(0,5);
+  const hotelAvg=Math.round(hotels.reduce((s,h)=>s+h.p,0)/hotels.length);
+  const sites=(BOOKING[country]||[{n:"Booking.com",u:"https://www.booking.com/"}])
+    .map(x=>`<a href="${affLink(x.u)}" target="_blank" rel="noopener sponsored">${x.n}</a>`).join(" · ");
+  const fmtRow=(k,v)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:2px 0"><span>${k}</span><span>${v}</span></div>`;
+  const dstr=ds=>`${ds}(${dow(ds)})`;
+  const fmt=c=>`${fmtRow(`항공 ${dstr(c.date)}→${dstr(c.ret)} ${c.time} ${c.ap} · ${c.airline}`,`${c.price.toLocaleString()}원`)}${fmtRow(`시간 (비행${flyH*2}h+이동${tr.h}h+접근${originH}h)`,c.timeCost.toLocaleString()+"원")}${fmtRow("공항이동",transCost.toLocaleString()+"원")}${fmtRow("<b>항공 소계</b>",`<b>${c.total.toLocaleString()}원</b>`)}`;
+
+  out.innerHTML=`
+  <div class="ticket win"><div class="stub"><div class="head"><b>${month} ${tripDays}일 왕복 1위</b><span class="fare">${bestWin?bestWin.total.toLocaleString():0}원</span></div>
+  <div style="font-size:17px;font-weight:800">${bestWin?dstr(bestWin.s)+" → "+dstr(bestWin.e):dstr(bestMonth.date)} · ${origin}→${destCode}</div>
+  <small>${trName} · 국적기 · ${from}~${to} · 숙소 ${NIGHTS}박 포함</small>
+  ${fmt(bestMonth)}
+  ${fmtRow("숙소",bestWin?bestWin.hotel.toLocaleString()+"원":"-")}
+  <small>예약: ${flightLinks(bestMonth.ap, destCode, bestMonth.date, bestMonth.ret)}</small></div></div>
+  <div class="ticket"><div class="stub"><div class="head"><b>TOP3</b><span class="fare">항공+숙소 합산 순</span></div>
+  ${top3.map((w,i)=>`<div style="border-top:1px dashed var(--line);padding:6px 0">${fmtRow(`<b>${i+1}위 ${dstr(w.s)}~${dstr(w.e)}</b>`,``)}${fmtRow("항공",w.f.price.toLocaleString()+"원")}${fmtRow("숙소",w.hotel.toLocaleString()+"원")}${fmtRow("<b>합계</b>",`<b>${w.total.toLocaleString()}원</b>`)}<small>${flightLinks(w.f.ap, destCode, w.s, w.e)}</small></div>`).join("")||"해당 월에 연속 일정 없음"}</div></div>
+  ${hasRange?`<div class="ticket"><div class="stub"><div class="head"><b>선택기간(${s}~${e}) 최저</b><span class="fare">참고용</span></div>${bestRange?fmt(bestRange):"해당 기간에 없음"}</div></div>`:""}
+  <div class="ticket"><div class="stub"><div class="head"><b>숙소 5건</b><span class="fare">평균 ${Math.round(hotelAvg/NIGHTS).toLocaleString()}원/박</span></div>
+  <small>항공 ${hotelBase} 출발·${NIGHTS}박 기준 cheapest, 캡슐 제외</small><br>
+  ${hotels.map(h=>`<a href="${hotelDeep(hotelBase,coStr)}" target="_blank" rel="noopener sponsored">${h.n}</a> · ${NIGHTS}박 ${h.p.toLocaleString()}원 · ${h.area}㎡`).join("<br>")}
+  <br><small>예약: ${sites}</small></div></div>
+  <p><small>목업 데이터입니다. 5건 평균 참고용, 항공일 기준 ${NIGHTS}박 합산입니다.</small></p>
+  <div id="live"></div>`;
+  // 실가 재확인: 목업 TOP3 날짜만 Duffel 프록시로 조회 (조회 무료, 키 없으면 스킵)
+  try{
+    const ap0=(airports||[])[0]||"ICN";
+    const qs=(w)=>new URLSearchParams({origin:ap0,destination:destCode,dep:w.s,ret:w.e,from,to}).toString();
+    const results=await Promise.all(top3.map(async (w)=>{
+      const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),9000);
+      try{
+        const r=await fetch(`/api/prices?${qs(w)}`,{signal:ctl.signal});
+        if(!r.ok) return null;
+        const j=await r.json();
+        const offs=(j.offers||[]).filter(o=>o.time>=from&&o.time<=to).sort((a,b)=>a.price-b.price);
+        return offs.length?{w,o:offs[0]}:null;
+      }catch{return null;}finally{clearTimeout(t);}
+    }));
+    const live=results.filter(Boolean);
+    const el=document.getElementById("live");
+    if(el&&live.length){
+      el.innerHTML=`<div class="ticket"><div class="stub"><div class="head"><b>실가 재확인 (Duffel, ${ap0} 기준)</b><span class="fare">조회 무료</span></div>`
+      +live.map(({w,o})=>`${w.s}~${w.e} · ${escapeHtml(o.airline)} ${escapeHtml(o.time)} ${escapeHtml(o.ap)} · <b>${o.price.toLocaleString()}원</b> (30분 확정가, 재확인 필요)`).join("<br>")
+      +`</div></div>`;
+    }
+  }catch{}
+};
+function escapeHtml(s){
+  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function parseYmd(ds){
+  const [y,m,d]=ds.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+</script>
+</body>
+</html>
